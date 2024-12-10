@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="/styles.css"> <!-- Retro theme CSS -->
+</head>
+<body class="retro-theme">
+    <div class="container">
+        <h1>Login</h1>
+        <form id="loginForm">
+            <label for="email">Email</label>
+            <input type="email" name="email" id="email" required>
+            
+            <label for="password">Password</label>
+            <input type="password" name="password" id="password" required>
+            
+            <button type="submit" class="retro-btn">Login</button>
+        </form>
+        <p>Don't have an account? <a href="/register">Register</a></p>
+    </div>
+
+    <script>
+        // Check if the user is already logged in (i.e., if there's a token in localStorage)
+        const token = localStorage.getItem('authToken');
+        if (token) {
+            // If the token exists, redirect to /posts
+            window.location.href = '/posts';
+        }
+
+        // Add an event listener to handle form submission
+        document.getElementById('loginForm').addEventListener('submit', async function(event) {
+            event.preventDefault();  // Prevent form from submitting the traditional way
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    // Assuming the response contains a token
+                    if (data.token) {
+                        // Store the token in localStorage
+                        localStorage.setItem('authToken', data.token);
+                        alert('Login successful!');
+                        window.location.href = '/posts';  // Redirect to posts page
+                    } else {
+                        alert('Login failed: No token received.');
+                    }
+                } else {
+                    const errorData = await response.json();
+                    alert(`Login failed: ${errorData.message}`);
+                }
+            } catch (error) {
+                console.error('Error during login:', error);
+                alert('An error occurred while logging in.');
+            }
+        });
+    </script>
+</body>
+</html>

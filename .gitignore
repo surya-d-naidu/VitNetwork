@@ -1,0 +1,5 @@
+.env
+/node_modules
+/routes/friendsRoutes.js
+/controllers/friendsController.js
+structure.txt

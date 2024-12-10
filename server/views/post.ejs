@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= post.title %></title>
+    <link rel="stylesheet" href="/styles.css"> <!-- Retro theme CSS -->
+</head>
+<body class="retro-theme">
+    <div class="container">
+        <h1><%= post.title %></h1>
+        <p><%- post.content.replace(/\n/g, '<br>') %></p>
+        <p>Posted by <%= post.author.name %> on <%= post.createdAt.toLocaleDateString() %></p>
+
+        <h2>Comments</h2>
+        <h3>Add Comment</h3>
+        <form id="comment-form">
+            <input type="text" id="comment-text" name="text" required placeholder="Write your comment...">
+            <input type="hidden" id="postId" name="postId" value="<%= post._id %>">
+            <button type="submit" class="retro-btn">Submit Comment</button>
+        </form>
+
+        <div class="comments-list">
+            <% comments.forEach(comment => { %>
+                <div class="comment-card">
+                    <p><%= comment.text %></p>
+                    <p>By <%= comment.author.name %></p>
+
+                    <!-- Edit comment form -->
+                    <form action="/edit-comment/<%= comment._id %>" method="POST" style="display:inline;">
+                        <button type="submit" class="retro-btn">Edit</button>
+                    </form>
+
+                    <!-- Delete comment form -->
+                    <form action="/delete-comment/<%= comment._id %>" method="POST" style="display:inline;">
+                        <button type="submit" class="retro-btn">Delete</button>
+                    </form>
+                </div>
+            <% }) %>
+        </div>
+    </div>
+
+    <script>
+        // Assuming token is stored in localStorage after login
+        const token = localStorage.getItem('authToken'); // Get the token from localStorage
+
+        const commentForm = document.getElementById('comment-form');
+        commentForm.addEventListener('submit', async (event) => {
+            event.preventDefault(); // Prevent the default form submission
+
+            const commentText = document.getElementById('comment-text').value;
+            const postId = document.getElementById('postId').value;
+
+            if (!token) {
+                alert('You must be logged in to post a comment');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/comments/${postId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}` // Include the token in the Authorization header
+                    },
+                    body: JSON.stringify({
+                        text: commentText,
+                        postId: postId
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('Comment posted successfully');
+                    location.reload(); // Reload the page to see the new comment
+                } else {
+                    alert(data.message || 'Error posting comment');
+                }
+            } catch (error) {
+                console.error(error);
+                alert('An error occurred while posting the comment');
+            }
+        });
+    </script>
+</body>
+</html>
