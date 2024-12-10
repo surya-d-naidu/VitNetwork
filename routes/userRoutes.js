@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
 const User = require('../models/User');
+const { blockUser, unblockUser } = require('../controllers/userController');
 
 // Profile page route
 router.get('/profile', authMiddleware, async (req, res) => {
@@ -16,5 +17,11 @@ router.get('/profile', authMiddleware, async (req, res) => {
     res.status(500).json({ message: 'Server error', error });
   }
 });
+
+// Block a user
+router.post('/block', authMiddleware, blockUser);
+
+// Unblock a user
+router.post('/unblock', authMiddleware, unblockUser);
 
 module.exports = router;
